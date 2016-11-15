@@ -1,0 +1,10 @@
+// comment
+add node0: JavascriptNode/LATEST/LATEST
+add node0.ticker: kevoree.Ticker/42/RELEASE
+add chan: LocalChannel/LATEST/LATEST
+
+bind node0.ticker.tick chan
+
+set *.ticker.* = '200'
+
+set node0.logLevel = "DEBUG"

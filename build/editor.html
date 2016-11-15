@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Editor</title>
+  <style type="text/css" media="screen">
+    body {
+        overflow: hidden;
+    }
+
+    #editor {
+        margin: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+  </style>
+</head>
+<body>
+
+<pre id="editor">add node0 : JavaNode/LATEST/LATEST
+add sync : kevoree.WSGroup/LATEST/LATEST
+attach node0 sync
+
+set sync.onConnect = "
+Hello !
+This is a try to create a big script using standard Kevoree-library coming from https://github.com/kevoree/kevoree-library
+So I try to put lot of information in a String which be parsed by KevScript as a RealString with multiple lines,
+some special character like ù%*é=^``~&°.:!§,?/#çà][-|
+
+This test is use to test waxeye and check if our grammar avoid the potential stackoverflow coming from to many recursion.
+To avoid it, we write RealString as a set of rules which are the following:
+
+Escaped1      <- ['] | '\\'
+Escaped2      <- [\"] | '\\'
+
+NotEscaped1Line <- +(!Escaped1 !eol .)
+NotEscaped2Line <- +(!Escaped2 !eol .)
+
+For more information about waxeye: https://github.com/orlandohill/waxeye
+"
+add node0.ticker : Ticker/LATEST/LATEST
+add hub : LocalChannel/LATEST/LATEST
+
+add %%nodeName%%: kevoree.JavascriptNode/LATEST/LATEST
+add %%grp%%: WSGroup/LATEST/LATEST
+
+set %grp%.master = '%%foo%%'
+
+attach %%nodeName%% %grp%
+
+bind node0.ticker.tick hub
+
+set node0.ticker.period = "3000"</pre>
+
+<script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/kool");
+    // editor.config.set('tiny-conf', 'latest');
+    // editor.config.set('kevoree-library', 'next');
+    // editor.config.set('kevoree-validator', 'latest');
+    // editor.config.set('kevoree-registry-api', 'latest');
+    // editor.config.set('kevoree-kevscript', 'next');
+    editor.session.setMode("ace/mode/kevscript");
+    editor.setOption('fontSize', '16px');
+</script>
+
+</body>
+</html>

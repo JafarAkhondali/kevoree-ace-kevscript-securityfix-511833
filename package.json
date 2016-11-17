@@ -1,10 +1,10 @@
 {
-    "name": "ace",
-    "description": "Ajax.org Code Editor is a full featured source code highlighting editor that powers the Cloud9 IDE",
+    "name": "ace-kevscript",
+    "description": "Ajax.org Code Editor with KevScript support",
     "version": "1.2.5",
-    "homepage": "http://github.com/ajaxorg/ace",
+    "homepage": "http://github.com/kevoree/ace-kevscript",
     "engines": {"node": ">= 0.6.0"},
-    "author": "Fabian Jakobs <fabian@c9.io>",
+    "author": "Maxime Tricoire <max.tricoire@gmail.com>",
     "main": "lib/ace",
     "repository": {
         "type": "git",

@@ -19,6 +19,7 @@ var themeData = [
     ["KatzenMilch"],
     ["SQL Server"           ,"sqlserver"               , "light"],
     ["Ambiance"             ,"ambiance"                ,  "dark"],
+    ["Kool"                 ,"kool"                    ,  "dark"],
     ["Chaos"                ,"chaos"                   ,  "dark"],
     ["Clouds Midnight"      ,"clouds_midnight"         ,  "dark"],
     ["Cobalt"               ,"cobalt"                  ,  "dark"],

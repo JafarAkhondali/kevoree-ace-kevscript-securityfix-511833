@@ -42,7 +42,7 @@ define("ace/mode/kevscript_highlight_rules",["require","exports","module","ace/l
   var oop = require('../lib/oop');
   var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-  function KevscriptHighlightRules() {
+  function KevScriptHighlightRules() {
     this.$rules = {
       start: [
         { regex: /\/\/.*/, token: 'comment.line.double-slash' },
@@ -75,37 +75,86 @@ define("ace/mode/kevscript_highlight_rules",["require","exports","module","ace/l
         lineComment: '//'
       }
     };
+
+    
   };
 
-  oop.inherits(KevscriptHighlightRules, TextHighlightRules);
-  exports.KevscriptHighlightRules = KevscriptHighlightRules;
+  KevScriptHighlightRules.metaData = {
+      fileTypes: ['kevs'],
+      name: "KevScript",
+      scopeName: "source.KevScript"
+  }
+
+  oop.inherits(KevScriptHighlightRules, TextHighlightRules);
+  exports.KevScriptHighlightRules = KevScriptHighlightRules;
 });
 
-define("ace/mode/kevscript",["require","exports","module","ace/lib/oop","ace/mode/text","ace/tokenizer","ace/mode/matching_brace_outdent","ace/worker/worker_client","ace/mode/kevscript_highlight_rules"], function(require, exports, module) {
+define("ace/mode/kevscript_completions",["require","exports","module"], function(require, exports, module) {
+  "use strict";
+
+  function KevScriptCompletions() {}
+
+  KevScriptCompletions.prototype = {
+    defineCompletions: function () {},
+
+    getCompletions: function (state, session, pos, prefix, callback) {
+      if (session.$worker) {
+        var token = session.getTokenAt(pos.row, pos.column);
+        session.$worker.call('getCompletions', [token, pos, prefix], function (suggestions) {
+          callback(null, suggestions);
+        });
+      }
+    }
+  };
+
+  exports.KevScriptCompletions = KevScriptCompletions;
+});
+
+define("ace/mode/kevscript",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/matching_brace_outdent","ace/worker/worker_client","ace/mode/kevscript_highlight_rules","ace/mode/kevscript_completions"], function(require, exports, module) {
   "use strict";
 
   var oop = require("../lib/oop");
+
   var TextMode = require("./text").Mode;
-  var Tokenizer = require("../tokenizer").Tokenizer;
   var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
   var WorkerClient = require("../worker/worker_client").WorkerClient;
-  var KevscriptHighlightRules = require("./kevscript_highlight_rules").KevscriptHighlightRules;
+  var KevScriptHighlightRules = require("./kevscript_highlight_rules").KevScriptHighlightRules;
+  var KevScriptCompletions = require('./kevscript_completions').KevScriptCompletions;
 
   function KevScriptMode() {
-    this.HighlightRules = KevscriptHighlightRules;
+    this.HighlightRules = KevScriptHighlightRules;
+    this.completer = new KevScriptCompletions();
+    this.options = {
+      'tiny-conf': 'latest',
+      'kevoree-library': 'next',
+      'kevoree-validator': 'latest',
+      'kevoree-registry-api': 'latest',
+      'kevoree-kevscript': 'next'
+    };
   };
 
   oop.inherits(KevScriptMode, TextMode);
 
   (function() {
-    this.$id = 'kevscript';
+    this.$id = 'ace/mode/kevscript';
+
     this.lineCommentStart = '//';
+
     this.createWorker = function(session) {
       var worker = new WorkerClient(['ace'], 'ace/mode/kevscript_worker', 'KevScriptWorker');
       worker.attachToDocument(session.getDocument());
 
       worker.on('lint', function (results) {
         session.setAnnotations(results.data);
+      });
+
+      worker.emit('init', {
+        data: Object.keys(this.options)
+          .reduce(function (array, key) {
+            var path = key === 'tiny-conf' ? 'dist':'browser';
+            array.push('https://unpkg.com/' + key + '@' + this.options[key] + '/' + path + '/' + key + '.js');
+            return array;
+          }.bind(this), [])
       });
 
       return worker;

@@ -124,13 +124,6 @@ define("ace/mode/kevscript",["require","exports","module","ace/lib/oop","ace/mod
   function KevScriptMode() {
     this.HighlightRules = KevScriptHighlightRules;
     this.completer = new KevScriptCompletions();
-    this.options = {
-      'tiny-conf': 'latest',
-      'kevoree-library': 'next',
-      'kevoree-validator': 'latest',
-      'kevoree-registry-api': 'latest',
-      'kevoree-kevscript': 'next'
-    };
   };
 
   oop.inherits(KevScriptMode, TextMode);
@@ -146,15 +139,6 @@ define("ace/mode/kevscript",["require","exports","module","ace/lib/oop","ace/mod
 
       worker.on('lint', function (results) {
         session.setAnnotations(results.data);
-      });
-
-      worker.emit('init', {
-        data: Object.keys(this.options)
-          .reduce(function (array, key) {
-            var path = key === 'tiny-conf' ? 'dist':'browser';
-            array.push('https://unpkg.com/' + key + '@' + this.options[key] + '/' + path + '/' + key + '.js');
-            return array;
-          }.bind(this), [])
       });
 
       return worker;

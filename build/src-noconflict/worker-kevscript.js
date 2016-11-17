@@ -1431,18 +1431,25 @@ ace.define("ace/mode/kevscript_worker",["require","exports","module","ace/lib/oo
 
   var noop = function () {};
 
-  var logger = {
-    info: noop,
-    debug: noop,
-    warn: noop,
-    error: noop,
-    setLevel: function() {},
-    setFilter: function() {}
-  };
-
   function KevScriptWorker(sender) {
     Mirror.call(this, sender);
     this.delayedCompletions = [];
+    var logger = {
+      info: function (tag, msg) {
+        sender.emit('log', { type: 'info', tag: tag, message: msg });
+      },
+      debug: function (tag, msg) {
+        sender.emit('log', { type: 'debug', tag: tag, message: msg });
+      },
+      warn: function (tag, msg) {
+        sender.emit('log', { type: 'warn', tag: tag, message: msg });
+      },
+      error: function (tag, msg) {
+        sender.emit('log', { type: 'error', tag: tag, message: msg });
+      },
+      setLevel: function() {},
+      setFilter: function() {}
+    };
 
     sender.on('init', function (results) {
       var defineBkp = define;
@@ -1452,20 +1459,12 @@ ace.define("ace/mode/kevscript_worker",["require","exports","module","ace/lib/oo
       exports = null;
       module = null;
 
-      importScripts.apply(self, results.data);
+      importScripts.apply(self, results.data.deps);
       define = defineBkp;
       exports = exportsBkp;
       module = moduleBkp;
 
-      TinyConf.set('registry', {
-        host: 'kevoree.braindead.fr',
-        port: 443,
-        ssl: true,
-        oauth: {
-          client_id: 'kevoree_registryapp',
-          client_secret: 'kevoree_registryapp_secret'
-        }
-      });
+      TinyConf.set('registry', results.data.registry);
       this.kevs = new KevoreeKevscript(logger);
     }.bind(this));
   }

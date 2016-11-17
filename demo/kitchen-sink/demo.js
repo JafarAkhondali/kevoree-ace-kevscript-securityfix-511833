@@ -98,6 +98,43 @@ split.on("focus", function(editor) {
 env.split = split;
 window.env = env;
 
+env.editor.on('changeSession', function (obj, editor) {
+  obj.session.on('changeMode', function (event, session) {
+    var deps = {
+      'tiny-conf': 'latest',
+      'kevoree-library': 'next',
+      'kevoree-validator': 'latest',
+      'kevoree-registry-api': 'latest',
+      'kevoree-kevscript': 'next'
+    };
+    var depsArray = Object.keys(deps)
+      .reduce(function (array, key) {
+        var path = key === 'tiny-conf' ? 'dist':'browser';
+        array.push('https://unpkg.com/' + key + '@' + deps[key] + '/' + path + '/' + key + '.js');
+        return array;
+      }.bind(this), []);
+
+    session.$worker.on('log', function (results) {
+      var log = results.data;
+      console.log(log.type.toUpperCase(), log.tag, log.message);
+    });
+
+    session.$worker.emit('init', {
+      data: {
+        deps: depsArray,
+        registry: {
+          host: 'kevoree.braindead.fr',
+          port: 443,
+          ssl: true,
+          oauth: {
+            client_id: 'kevoree_registryapp',
+            client_secret: 'kevoree_registryapp_secret'
+          }
+        }
+      }
+    });
+  });
+});
 
 var consoleEl = dom.createElement("div");
 container.parentNode.appendChild(consoleEl);
@@ -626,7 +663,7 @@ commandManager.addCommands([{
 function moveFocus() {
     var el = document.activeElement;
     if (el == env.editor.textInput.getElement())
-        env.editor.cmdLine.focus();    
+        env.editor.cmdLine.focus();
     else
         env.editor.focus();
 }

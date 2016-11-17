@@ -102,6 +102,50 @@ Also check out the sample code for the kitchen sink [demo app](https://github.co
 
 If you still need help, feel free to drop a mail on the [ace mailing list](http://groups.google.com/group/ace-discuss), or at `irc.freenode.net#ace`.
 
+KevScript specific documentation
+--------------------------------
+In order to configure the `kevscript_worker` you have to send some events with options:
+```js
+var editor = ace.edit('someId');
+editor.on('changeSession', function (obj, editor) {
+  obj.session.on('changeMode', function (event, session) {
+    var deps = {
+      'tiny-conf': 'latest',
+      'kevoree-library': 'next',
+      'kevoree-validator': 'latest',
+      'kevoree-registry-api': 'latest',
+      'kevoree-kevscript': 'next'
+    };
+    var depsArray = Object.keys(deps)
+      .reduce(function (array, key) {
+        var path = key === 'tiny-conf' ? 'dist':'browser';
+        array.push('https://unpkg.com/' + key + '@' + deps[key] + '/' + path + '/' + key + '.js');
+        return array;
+      }.bind(this), []);
+
+    session.$worker.on('log', function (results) {
+      var log = results.data;
+      console.log(log.type.toUpperCase(), log.tag, log.message);
+    });
+
+    session.$worker.emit('init', {
+      data: {
+        deps: depsArray,
+        registry: {
+          host: 'kevoree.braindead.fr',
+          port: 443,
+          ssl: true,
+          oauth: {
+            client_id: 'kevoree_registryapp',
+            client_secret: 'kevoree_registryapp_secret'
+          }
+        }
+      }
+    });
+  });
+});
+```
+
 Running Ace
 -----------
 

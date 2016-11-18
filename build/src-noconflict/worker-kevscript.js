@@ -1438,12 +1438,16 @@ ace.define("ace/mode/kevscript_worker",["require","exports","module","ace/lib/oo
 
     var logger = {
       info: function (tag, msg) {
+        sender.emit('log', { type: 'info', tag: tag, message: msg });
       },
       debug: function (tag, msg) {
+        sender.emit('log', { type: 'debug', tag: tag, message: msg });
       },
       warn: function (tag, msg) {
+        sender.emit('log', { type: 'warn', tag: tag, message: msg });
       },
       error: function (tag, msg) {
+        sender.emit('log', { type: 'error', tag: tag, message: msg });
       },
       setLevel: function() {},
       setFilter: function() {}
